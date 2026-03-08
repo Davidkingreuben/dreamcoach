@@ -228,15 +228,21 @@ function yearsToApproxDays(years: string): number {
 
 function ProgressBar({ current, total }: { current: number; total: number }) {
   return (
-    <div style={{ height: 2, background: "rgba(255,255,255,0.06)", width: "100%" }}>
-      <div
-        style={{
-          height: "100%",
-          width: `${Math.round((current / total) * 100)}%`,
-          background: "rgba(255,255,255,0.4)",
-          transition: "width 0.3s ease",
-        }}
-      />
+    <div style={{ display: "flex", gap: 3, width: "100%" }}>
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          style={{
+            flex: 1,
+            height: 2,
+            borderRadius: 1,
+            background: i < current
+              ? "rgba(200, 210, 240, 0.75)"
+              : "rgba(150, 165, 210, 0.15)",
+            transition: "background 0.3s ease",
+          }}
+        />
+      ))}
     </div>
   );
 }
@@ -322,7 +328,7 @@ function SliderRow({
     <div style={{ marginBottom: mb }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
         <span style={{ fontSize: 15, color: T.text }}>{label}</span>
-        <span style={{ fontSize: 32, fontWeight: 300, color: T.text, lineHeight: 1 }}>{value}</span>
+        <span style={{ fontSize: 24, fontWeight: 300, color: T.text, lineHeight: 1 }}>{value}</span>
       </div>
       <input
         type="range"
@@ -615,17 +621,16 @@ export default function CheckPage() {
 
   return (
     <main style={{ background: T.bg, minHeight: "100dvh", display: "flex", flexDirection: "column", maxWidth: 430, margin: "0 auto" }}>
-      {/* Progress */}
-      <ProgressBar current={step + 1} total={TOTAL_STEPS} />
-
       {/* Header */}
-      <div style={{ padding: "calc(env(safe-area-inset-top,0px) + 16px) 24px 0" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+      <div style={{ padding: "calc(env(safe-area-inset-top,0px) + 16px) 24px 10px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
           <p style={{ fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase" as const, color: T.muted, fontWeight: 500 }}>
-            Dream Coach · {phaseLabel}
+            {phaseLabel}
           </p>
           <p style={{ fontSize: 11, color: T.muted }}>{step + 1} / {TOTAL_STEPS}</p>
         </div>
+        {/* Progress — segmented dashes, below the label */}
+        <ProgressBar current={step + 1} total={TOTAL_STEPS} />
       </div>
 
       {/* Step content */}
@@ -737,17 +742,17 @@ export default function CheckPage() {
               {/* Day-count card */}
               {intake.years_delayed !== "" && (
                 <div style={{
-                  marginTop: 12,
-                  padding: "16px 20px",
+                  marginTop: 18,
+                  padding: "18px 20px",
                   borderRadius: 12,
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "rgba(8, 8, 20, 0.7)",
+                  border: "1px solid rgba(150, 165, 210, 0.12)",
                   textAlign: "center" as const,
                 }}>
-                  <p style={{ fontSize: 12, color: T.muted, marginBottom: 6 }}>
+                  <p style={{ fontSize: 11, color: T.muted, marginBottom: 8, letterSpacing: "0.02em" }}>
                     You&apos;ve carried this for approximately
                   </p>
-                  <p style={{ fontSize: 28, fontWeight: 300, color: T.text, lineHeight: 1.1, marginBottom: 6 }}>
+                  <p style={{ fontSize: 28, fontWeight: 300, color: T.text, lineHeight: 1.1, marginBottom: 8 }}>
                     {yearsToApproxDays(intake.years_delayed).toLocaleString()} days
                   </p>
                   <p style={{ fontSize: 12, color: T.muted, lineHeight: 1.6, margin: 0 }}>
