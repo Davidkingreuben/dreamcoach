@@ -8,18 +8,18 @@ import type { Dream } from "@/lib/types";
 const COPY_OPTIONS = [
   {
     id: "honest",
-    headline: ["That thing you keep telling yourself you'll eventually do.", "Why haven't you started?"],
-    body: "Unfinished ambitions don't disappear.\nThey sit in the background — draining attention and quietly turning into \"I should have.\"",
+    headline: ["DREAM", "COACH"],
+    body: "This isn't about motivation.\nIt's about understanding why you haven't started.",
   },
   {
     id: "direct",
-    headline: ["That thing you keep telling yourself you'll eventually do.", "Why haven't you started?"],
-    body: "Unfinished ambitions don't disappear.\nThey sit in the background — draining attention and quietly turning into \"I should have.\"",
+    headline: ["DREAM", "COACH"],
+    body: "This isn't about motivation.\nIt's about understanding why you haven't started.",
   },
   {
     id: "gentle",
-    headline: ["That thing you keep telling yourself you'll eventually do.", "Why haven't you started?"],
-    body: "Unfinished ambitions don't disappear.\nThey sit in the background — draining attention and quietly turning into \"I should have.\"",
+    headline: ["DREAM", "COACH"],
+    body: "This isn't about motivation.\nIt's about understanding why you haven't started.",
   },
 ];
 
@@ -178,19 +178,13 @@ export default function HomePage() {
           }}
         >
           <p style={{ fontSize: 13, color: "var(--db-sub)", lineHeight: 1.7, margin: 0 }}>
-            Dream Coach is a <strong>3-minute diagnostic</strong> for a project you've been putting off.
+            A quick <strong>3-minute diagnostic</strong> for a project you've been putting off.
           </p>
           <p style={{ fontSize: 13, color: "var(--db-sub)", lineHeight: 1.7, margin: "8px 0 0" }}>
-            Through a short series of questions, it reveals what's actually stopping you — so you can either bring the idea into reality or finally let it go.
+            It helps you see what's stopping you — so you can either bring it into reality or let it go.
           </p>
         </div>
 
-        {/* Dream definition */}
-        <div style={{ marginTop: 32 }}>
-          <p style={{ fontSize: 13, color: "var(--db-muted)", lineHeight: 1.7, margin: 0 }}>
-            Here, a <em>dream</em> simply means a project you've delayed starting — writing a book, releasing music, starting a company, or building something meaningful.
-          </p>
-        </div>
       </div>
 
       {/* CTA */}
