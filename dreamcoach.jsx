@@ -399,7 +399,7 @@ function SplashScreen({ onStart }) {
               DREAM
             </h1>
             <h1 style={{ fontSize: 52, fontWeight: 700, letterSpacing: "-0.03em", color: C.text, lineHeight: 1, margin: 0 }}>
-              COACH (test five)
+              COACH
             </h1>
           </div>
         </div>
