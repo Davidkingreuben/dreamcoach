@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 // ─────────────────────────────────────────────
 
 const CATEGORIES = [
-  "Music", "Podcast", "Art", "Business",
+  "Musica", "Podcast", "Art", "Business",
   "Athletic", "Writing", "Lifestyle", "Other"
 ];
 
