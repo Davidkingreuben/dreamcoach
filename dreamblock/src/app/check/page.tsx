@@ -63,7 +63,7 @@ type RealityQ = RealityQSingle | RealityQMulti | RealityQBool | RealityQText;
 // ── Step definitions ───────────────────────────────────────────────────────────
 
 const CATEGORIES = [
-  "Music", "Podcast", "Art", "Business",
+  "Musica", "Podcast", "Art", "Business",
   "Athletic", "Writing", "Lifestyle", "Other",
 ];
 
