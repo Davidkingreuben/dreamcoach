@@ -1,10 +1,10 @@
 :root {
   --db-bg: #080810;
   --db-surface: #0e0e18;
-  --db-border: rgba(255, 255, 255, 0.08);
-  --db-text: #f0f0f5;
-  --db-sub: rgba(240, 240, 245, 0.55);
-  --db-muted: rgba(240, 240, 245, 0.28);
+  --db-border: rgba(180, 195, 230, 0.1);
+  --db-text: #e8eaf4;
+  --db-sub: rgba(160, 175, 215, 0.72);
+  --db-muted: rgba(130, 150, 200, 0.48);
 }
 
 * {
@@ -45,6 +45,39 @@ input {
 
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* ── Range slider track brightness ─────────────────────────────────────────── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(180, 195, 235, 0.25);
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(220, 225, 245, 0.9);
+  cursor: pointer;
+  margin-top: -6px;
+}
+input[type="range"]::-moz-range-track {
+  background: rgba(180, 195, 235, 0.25);
+  height: 3px;
+  border-radius: 2px;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(220, 225, 245, 0.9);
+  cursor: pointer;
+  border: none;
 }
 
 @keyframes spin {

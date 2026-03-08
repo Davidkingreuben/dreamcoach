@@ -201,25 +201,48 @@ const REALITY_QUESTIONS: RealityQ[] = [
   },
 ];
 
-// Total step count
-const TOTAL_INTAKE = 6;     // steps 0–5
-const TOTAL_RESISTANCE = 5; // steps 6–10
-const TOTAL_REALITY = REALITY_QUESTIONS.length; // steps 11–18
-const TOTAL_STEPS = TOTAL_INTAKE + TOTAL_RESISTANCE + TOTAL_REALITY; // 19
+// ── Step counts ────────────────────────────────────────────────────────────────
+// Step 0      = combined intake page (title + category + years + sliders)
+// Steps 1–5   = resistance questions
+// Steps 6–13  = reality questions
+
+const TOTAL_INTAKE = 1;
+const TOTAL_RESISTANCE = 5;
+const TOTAL_REALITY = REALITY_QUESTIONS.length; // 8
+const TOTAL_STEPS = TOTAL_INTAKE + TOTAL_RESISTANCE + TOTAL_REALITY; // 14
+
+// ── Day-count helper ───────────────────────────────────────────────────────────
+
+function yearsToApproxDays(years: string): number {
+  switch (years) {
+    case "< 1 year":   return 182;
+    case "1–3 years":  return 730;
+    case "3–7 years":  return 1825;
+    case "7–15 years": return 3650;
+    case "15+ years":  return 5475;
+    default:           return 0;
+  }
+}
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
 function ProgressBar({ current, total }: { current: number; total: number }) {
   return (
-    <div style={{ height: 2, background: "rgba(255,255,255,0.06)", width: "100%" }}>
-      <div
-        style={{
-          height: "100%",
-          width: `${Math.round((current / total) * 100)}%`,
-          background: "rgba(255,255,255,0.4)",
-          transition: "width 0.3s ease",
-        }}
-      />
+    <div style={{ display: "flex", gap: 3, width: "100%" }}>
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          style={{
+            flex: 1,
+            height: 2,
+            borderRadius: 1,
+            background: i < current
+              ? "rgba(210, 220, 248, 0.9)"
+              : "rgba(160, 175, 220, 0.28)",
+            transition: "background 0.3s ease",
+          }}
+        />
+      ))}
     </div>
   );
 }
@@ -242,6 +265,30 @@ function ChipBtn({
         lineHeight: 1.4,
         transition: "all 0.15s ease",
         width: "100%",
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+function PillBtn({
+  label, selected, onClick,
+}: { label: string; selected: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        padding: "8px 18px",
+        borderRadius: 22,
+        border: selected ? "1px solid rgba(255,255,255,0.5)" : "1px solid rgba(255,255,255,0.12)",
+        background: selected ? "rgba(255,255,255,0.13)" : "rgba(255,255,255,0.03)",
+        color: selected ? T.text : T.sub,
+        fontSize: 14,
+        cursor: "pointer",
+        lineHeight: 1.4,
+        transition: "all 0.15s ease",
+        whiteSpace: "nowrap" as const,
       }}
     >
       {label}
@@ -275,13 +322,13 @@ function NextBtn({
 }
 
 function SliderRow({
-  label, value, onChange, min = 1, max = 10,
-}: { label: string; value: number; onChange: (v: number) => void; min?: number; max?: number }) {
+  label, value, onChange, min = 1, max = 10, mb = 24,
+}: { label: string; value: number; onChange: (v: number) => void; min?: number; max?: number; mb?: number }) {
   return (
-    <div style={{ marginBottom: 24 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-        <span style={{ fontSize: 14, color: T.sub }}>{label}</span>
-        <span style={{ fontSize: 20, fontWeight: 200, color: T.text }}>{value}</span>
+    <div style={{ marginBottom: mb }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+        <span style={{ fontSize: 15, color: T.text }}>{label}</span>
+        <span style={{ fontSize: 24, fontWeight: 300, color: T.text, lineHeight: 1 }}>{value}</span>
       </div>
       <input
         type="range"
@@ -292,10 +339,18 @@ function SliderRow({
         style={{ width: "100%", accentColor: "rgba(255,255,255,0.7)" }}
       />
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
-        <span style={{ fontSize: 11, color: T.muted }}>{min}</span>
-        <span style={{ fontSize: 11, color: T.muted }}>{max}</span>
+        <span style={{ fontSize: 11, color: T.muted }}>{min} — low</span>
+        <span style={{ fontSize: 11, color: T.muted }}>{max} — high</span>
       </div>
     </div>
+  );
+}
+
+function SectionLabel({ children }: { children: string }) {
+  return (
+    <p style={{ fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase" as const, color: T.muted, fontWeight: 500, marginBottom: 10 }}>
+      {children}
+    </p>
   );
 }
 
@@ -354,7 +409,7 @@ export default function CheckPage() {
     without_reward: null,
   });
 
-  // ── Insight state (top-level, not inside conditional) ──
+  // ── Insight state ──
   const [showInsight, setShowInsight] = useState(false);
   const [savedDreamId, setSavedDreamId] = useState<string>("");
   const [insight, setInsight] = useState<InsightSummary | null>(null);
@@ -428,30 +483,39 @@ export default function CheckPage() {
 
   // ── Can we proceed from current step? ──
   function canProceed(): boolean {
-    if (step === 0) return intake.title.trim().length > 0;
-    if (step === 1) return intake.category !== "";
-    if (step === 2) return intake.years_delayed !== "";
-    if (step === 3) return true; // slider always valid
-    if (step === 4) return true;
-    if (step === 5) return true;
-    if (step === 6) return resistance.emotion !== "";
-    if (step === 7) return resistance.first_thought !== "";
-    if (step === 8) return resistance.stuck_point !== "";
-    if (step === 9) return resistance.protecting !== "";
-    if (step === 10) return resistance.guaranteed_hesitate !== "";
+    // Step 0: combined intake page — need title, category, and years_delayed
+    if (step === 0) {
+      return (
+        intake.title.trim().length > 0 &&
+        intake.category !== "" &&
+        intake.years_delayed !== ""
+      );
+    }
 
-    // Reality steps
+    // Resistance steps (1–5)
+    if (step === 1) return resistance.emotion !== "";
+    if (step === 2) return resistance.first_thought !== "";
+    if (step === 3) return resistance.stuck_point !== "";
+    if (step === 4) return resistance.protecting !== "";
+    if (step === 5) return resistance.guaranteed_hesitate !== "";
+
+    // Reality steps (6–13)
     const rIdx = step - TOTAL_INTAKE - TOTAL_RESISTANCE;
     const q = REALITY_QUESTIONS[rIdx];
     if (!q) return true;
     if (q.kind === "single") return reality[q.field] !== "";
-    if (q.kind === "multi") return true; // multi-select always ok
+    if (q.kind === "multi") return true;
     if (q.kind === "bool") return reality[q.field] !== null;
     if (q.kind === "text") return reality[q.field].toString().trim().length > 0;
     return true;
   }
 
   const isLastStep = step === TOTAL_STEPS - 1;
+
+  // ── Phase label ──
+  let phaseLabel = "About the Dream";
+  if (step >= TOTAL_INTAKE && step < TOTAL_INTAKE + TOTAL_RESISTANCE) phaseLabel = "The Resistance";
+  if (step >= TOTAL_INTAKE + TOTAL_RESISTANCE) phaseLabel = "The Reality";
 
   // ── INSIGHT SCREEN ──────────────────────────────────────────────────────────
 
@@ -555,157 +619,176 @@ export default function CheckPage() {
 
   // ── ASSESSMENT SCREEN ────────────────────────────────────────────────────────
 
-  // Determine label for current step
-  let phaseLabel = "About the Dream";
-  if (step >= TOTAL_INTAKE && step < TOTAL_INTAKE + TOTAL_RESISTANCE) phaseLabel = "The Resistance";
-  if (step >= TOTAL_INTAKE + TOTAL_RESISTANCE) phaseLabel = "The Reality";
-
   return (
     <main style={{ background: T.bg, minHeight: "100dvh", display: "flex", flexDirection: "column", maxWidth: 430, margin: "0 auto" }}>
-      {/* Progress */}
-      <ProgressBar current={step + 1} total={TOTAL_STEPS} />
-
       {/* Header */}
-      <div style={{ padding: "calc(env(safe-area-inset-top,0px) + 16px) 24px 0" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+      <div style={{ padding: "calc(env(safe-area-inset-top,0px) + 16px) 24px 10px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
           <p style={{ fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase" as const, color: T.muted, fontWeight: 500 }}>
-            Dream Coach · {phaseLabel}
+            {phaseLabel}
           </p>
           <p style={{ fontSize: 11, color: T.muted }}>{step + 1} / {TOTAL_STEPS}</p>
         </div>
+        {/* Progress — segmented dashes, below the label */}
+        <ProgressBar current={step + 1} total={TOTAL_STEPS} />
       </div>
 
       {/* Step content */}
       <div className="hide-scrollbar" style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
 
-        {/* ── STEP 0: Title ── */}
+        {/* ── STEP 0: Combined intake page ── */}
         {step === 0 && (
-          <div>
-            <QHeader
-              label="The dream"
-              question="What have you been putting off?"
-              sub="Name it plainly. One sentence is enough."
-            />
-            <textarea
-              value={intake.title}
-              onChange={(e) => setIntake({ ...intake, title: e.target.value })}
-              placeholder="e.g. Recording my first album, starting my business, writing the book..."
-              rows={3}
-              style={{
-                width: "100%",
-                padding: "14px",
-                borderRadius: 12,
-                border: "1px solid rgba(255,255,255,0.1)",
-                background: "rgba(255,255,255,0.04)",
-                color: T.text,
-                fontSize: 15,
-                lineHeight: 1.5,
-                resize: "none",
-                outline: "none",
-                boxSizing: "border-box" as const,
-              }}
-            />
-          </div>
-        )}
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
 
-        {/* ── STEP 1: Category ── */}
-        {step === 1 && (
-          <div>
-            <QHeader
-              label="The dream"
-              question="What category does this fall into?"
-            />
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-              {CATEGORIES.map((cat) => (
-                <ChipBtn
-                  key={cat}
-                  label={cat}
-                  selected={intake.category === cat}
-                  onClick={() => setIntake({ ...intake, category: cat as typeof intake.category, category_other: "" })}
-                />
-              ))}
-            </div>
-            {intake.category === "Other" && (
+            {/* Title + input */}
+            <div>
+              <p style={{ fontSize: 26, fontWeight: 300, color: T.text, lineHeight: 1.3, marginBottom: 6 }}>
+                What have you been putting off?
+              </p>
+              <p style={{ fontSize: 13, color: T.muted, lineHeight: 1.5, marginBottom: 16 }}>
+                Be specific. Vagueness protects the fantasy.
+              </p>
+              <SectionLabel>Name it</SectionLabel>
               <input
-                value={intake.category_other || ""}
-                onChange={(e) => setIntake({ ...intake, category_other: e.target.value })}
-                placeholder="Describe it..."
-                style={{ marginTop: 12, width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.04)", color: T.text, fontSize: 14, outline: "none", boxSizing: "border-box" as const }}
+                type="text"
+                value={intake.title}
+                onChange={(e) => setIntake({ ...intake, title: e.target.value })}
+                placeholder="e.g. Write a book, launch a business, start the film, release your music..."
+                style={{
+                  width: "100%",
+                  padding: "13px 14px",
+                  borderRadius: 12,
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  background: "rgba(255,255,255,0.04)",
+                  color: T.text,
+                  fontSize: 14,
+                  lineHeight: 1.5,
+                  outline: "none",
+                  boxSizing: "border-box" as const,
+                }}
               />
-            )}
-          </div>
-        )}
-
-        {/* ── STEP 2: Years delayed ── */}
-        {step === 2 && (
-          <div>
-            <QHeader
-              label="The dream"
-              question="How long have you been putting this off?"
-            />
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {YEARS_OPTIONS.map((y) => (
-                <ChipBtn
-                  key={y}
-                  label={y}
-                  selected={intake.years_delayed === y}
-                  onClick={() => setIntake({ ...intake, years_delayed: y as typeof intake.years_delayed })}
-                />
-              ))}
             </div>
+
+            {/* Category */}
+            <div>
+              <SectionLabel>Category</SectionLabel>
+              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8 }}>
+                {CATEGORIES.map((cat) => (
+                  <PillBtn
+                    key={cat}
+                    label={cat}
+                    selected={intake.category === cat}
+                    onClick={() => setIntake({ ...intake, category: cat as typeof intake.category, category_other: "" })}
+                  />
+                ))}
+              </div>
+              {intake.category === "Other" && (
+                <input
+                  type="text"
+                  value={intake.category_other || ""}
+                  onChange={(e) => setIntake({ ...intake, category_other: e.target.value })}
+                  placeholder="Describe it..."
+                  style={{ marginTop: 8, width: "100%", padding: "10px 13px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.04)", color: T.text, fontSize: 14, outline: "none", boxSizing: "border-box" as const }}
+                />
+              )}
+            </div>
+
+            {/* Years delayed */}
+            <div>
+              <SectionLabel>How long have you wanted this?</SectionLabel>
+              {/* Row 1: first 4 equal-width */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6, marginBottom: 6 }}>
+                {YEARS_OPTIONS.slice(0, 4).map((y) => (
+                  <button
+                    key={y}
+                    onClick={() => setIntake({ ...intake, years_delayed: y as typeof intake.years_delayed })}
+                    style={{
+                      padding: "9px 4px",
+                      borderRadius: 10,
+                      border: intake.years_delayed === y ? "1px solid rgba(255,255,255,0.5)" : "1px solid rgba(255,255,255,0.12)",
+                      background: intake.years_delayed === y ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.03)",
+                      color: intake.years_delayed === y ? T.text : T.sub,
+                      fontSize: 12,
+                      cursor: "pointer",
+                      lineHeight: 1.4,
+                      transition: "all 0.15s ease",
+                      textAlign: "center" as const,
+                    }}
+                  >
+                    {y}
+                  </button>
+                ))}
+              </div>
+              {/* Row 2: 15+ years full-width */}
+              <button
+                onClick={() => setIntake({ ...intake, years_delayed: "15+ years" as typeof intake.years_delayed })}
+                style={{
+                  width: "100%",
+                  padding: "9px 16px",
+                  borderRadius: 10,
+                  border: intake.years_delayed === "15+ years" ? "1px solid rgba(255,255,255,0.5)" : "1px solid rgba(255,255,255,0.12)",
+                  background: intake.years_delayed === "15+ years" ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.03)",
+                  color: intake.years_delayed === "15+ years" ? T.text : T.sub,
+                  fontSize: 12,
+                  cursor: "pointer",
+                  lineHeight: 1.4,
+                  transition: "all 0.15s ease",
+                  textAlign: "center" as const,
+                }}
+              >
+                15+ years
+              </button>
+
+              {/* Day-count card */}
+              {intake.years_delayed !== "" && (
+                <div style={{
+                  marginTop: 18,
+                  padding: "18px 20px",
+                  borderRadius: 12,
+                  background: "rgba(8, 8, 20, 0.7)",
+                  border: "1px solid rgba(150, 165, 210, 0.12)",
+                  textAlign: "center" as const,
+                }}>
+                  <p style={{ fontSize: 11, color: T.muted, marginBottom: 8, letterSpacing: "0.02em" }}>
+                    You&apos;ve carried this for approximately
+                  </p>
+                  <p style={{ fontSize: 28, fontWeight: 300, color: T.text, lineHeight: 1.1, marginBottom: 8 }}>
+                    {yearsToApproxDays(intake.years_delayed).toLocaleString()} days
+                  </p>
+                  <p style={{ fontSize: 12, color: T.muted, lineHeight: 1.6, margin: 0 }}>
+                    That&apos;s not laziness. That&apos;s something worth understanding.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Signal sliders */}
+            <div>
+              <SliderRow
+                label="How much does this matter to you?"
+                value={intake.importance}
+                onChange={(v) => setIntake({ ...intake, importance: v })}
+                mb={28}
+              />
+              <SliderRow
+                label="How much does not doing it hurt?"
+                value={intake.pain}
+                onChange={(v) => setIntake({ ...intake, pain: v })}
+                mb={28}
+              />
+              <SliderRow
+                label="How afraid are you of actually doing it?"
+                value={intake.fear}
+                onChange={(v) => setIntake({ ...intake, fear: v })}
+                mb={4}
+              />
+            </div>
+
           </div>
         )}
 
-        {/* ── STEP 3: Importance ── */}
-        {step === 3 && (
-          <div>
-            <QHeader
-              label="Signal scores"
-              question="How important is this to you, really?"
-              sub="1 = mildly curious, 10 = this defines something essential about me."
-            />
-            <SliderRow
-              label="Importance"
-              value={intake.importance}
-              onChange={(v) => setIntake({ ...intake, importance: v })}
-            />
-          </div>
-        )}
-
-        {/* ── STEP 4: Pain ── */}
-        {step === 4 && (
-          <div>
-            <QHeader
-              label="Signal scores"
-              question="How much does NOT doing this cost you?"
-              sub="1 = barely notice, 10 = it weighs on me constantly."
-            />
-            <SliderRow
-              label="Pain of not doing it"
-              value={intake.pain}
-              onChange={(v) => setIntake({ ...intake, pain: v })}
-            />
-          </div>
-        )}
-
-        {/* ── STEP 5: Fear ── */}
-        {step === 5 && (
-          <div>
-            <QHeader
-              label="Signal scores"
-              question="How much does DOING this scare you?"
-              sub="1 = barely nervous, 10 = deeply afraid."
-            />
-            <SliderRow
-              label="Fear of doing it"
-              value={intake.fear}
-              onChange={(v) => setIntake({ ...intake, fear: v })}
-            />
-          </div>
-        )}
-
-        {/* ── STEP 6: Emotion ── */}
-        {step === 6 && (
+        {/* ── STEP 1: Emotion ── */}
+        {step === 1 && (
           <div>
             <QHeader
               label="The resistance"
@@ -732,8 +815,8 @@ export default function CheckPage() {
           </div>
         )}
 
-        {/* ── STEP 7: First thought ── */}
-        {step === 7 && (
+        {/* ── STEP 2: First thought ── */}
+        {step === 2 && (
           <div>
             <QHeader
               label="The resistance"
@@ -760,8 +843,8 @@ export default function CheckPage() {
           </div>
         )}
 
-        {/* ── STEP 8: Stuck point ── */}
-        {step === 8 && (
+        {/* ── STEP 3: Stuck point ── */}
+        {step === 3 && (
           <div>
             <QHeader
               label="The resistance"
@@ -788,8 +871,8 @@ export default function CheckPage() {
           </div>
         )}
 
-        {/* ── STEP 9: Protecting ── */}
-        {step === 9 && (
+        {/* ── STEP 4: Protecting ── */}
+        {step === 4 && (
           <div>
             <QHeader
               label="The resistance"
@@ -817,8 +900,8 @@ export default function CheckPage() {
           </div>
         )}
 
-        {/* ── STEP 10: Guaranteed hesitate ── */}
-        {step === 10 && (
+        {/* ── STEP 5: Guaranteed hesitate ── */}
+        {step === 5 && (
           <div>
             <QHeader
               label="The resistance"
@@ -840,7 +923,7 @@ export default function CheckPage() {
           </div>
         )}
 
-        {/* ── REALITY STEPS (11–18) ── */}
+        {/* ── REALITY STEPS (6–13) ── */}
         {step >= TOTAL_INTAKE + TOTAL_RESISTANCE && (() => {
           const rIdx = step - TOTAL_INTAKE - TOTAL_RESISTANCE;
           const q = REALITY_QUESTIONS[rIdx];
@@ -944,7 +1027,7 @@ export default function CheckPage() {
         <NextBtn
           onClick={next}
           disabled={!canProceed()}
-          label={isLastStep ? "See your insight →" : "Continue →"}
+          label={isLastStep ? "See your insight →" : step === 0 ? "Let's go deeper →" : "Continue →"}
         />
         {step > 0 && (
           <button
