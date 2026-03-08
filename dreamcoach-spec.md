@@ -41,7 +41,7 @@ interface Dream {
   classification?: DreamClassification;
 }
 
-type DreamCategory = "Musica" | "Podcast" | "Art" | "Business"
+type DreamCategory = "Music" | "Podcast" | "Art" | "Business"
                    | "Athletic" | "Writing" | "Lifestyle" | "Other";
 
 type YearsRange = "< 1 yr" | "1–3 yrs" | "3–7 yrs" | "7–15 yrs" | "15+ yrs";
