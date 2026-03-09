@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { saveDream } from "@/lib/storage";
 import { generateInsight } from "@/lib/logic/insight";
@@ -415,6 +415,12 @@ export default function CheckPage() {
   const [insight, setInsight] = useState<InsightSummary | null>(null);
   const [expandedCard, setExpandedCard] = useState<"seen" | "held" | "moved" | null>(null);
 
+  // ── Name It microinteraction ──
+  const [nameItPhase, setNameItPhase] = useState<null | "thinking" | "confirmed">(null);
+  const nameItTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const confirmedTitleRef = useRef("");   // the title value when feedback was last shown
+  const titleValueRef = useRef("");        // always-current input value (avoids stale closure)
+
   // ── Save and generate insight ──
   function saveAndFinish() {
     const id = crypto.randomUUID();
@@ -479,6 +485,19 @@ export default function CheckPage() {
   }
   function back() {
     if (step > 0) setStep(step - 1);
+  }
+
+  // Trigger the "thinking → confirmed" micro-sequence after Name It is completed.
+  // Accepts the current raw input value to avoid stale-closure issues.
+  function triggerNameItFeedback(currentValue: string) {
+    const title = currentValue.trim();
+    if (!title || title === confirmedTitleRef.current) return;
+    if (nameItTimerRef.current) clearTimeout(nameItTimerRef.current);
+    setNameItPhase("thinking");
+    nameItTimerRef.current = setTimeout(() => {
+      setNameItPhase("confirmed");
+      confirmedTitleRef.current = title;
+    }, 750);
   }
 
   // ── Can we proceed from current step? ──
@@ -652,7 +671,14 @@ export default function CheckPage() {
               <input
                 type="text"
                 value={intake.title}
-                onChange={(e) => setIntake({ ...intake, title: e.target.value })}
+                onChange={(e) => {
+                  titleValueRef.current = e.target.value;
+                  setIntake({ ...intake, title: e.target.value });
+                  // Reset feedback if user edits after confirming
+                  if (nameItPhase !== null) setNameItPhase(null);
+                }}
+                onBlur={(e) => triggerNameItFeedback(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") triggerNameItFeedback(e.currentTarget.value); }}
                 placeholder="e.g. Write a book, launch a business, start the film, release your music..."
                 style={{
                   width: "100%",
@@ -667,6 +693,36 @@ export default function CheckPage() {
                   boxSizing: "border-box" as const,
                 }}
               />
+
+              {/* ── Name It microinteraction ── */}
+              {nameItPhase === "thinking" && (
+                <div style={{ display: "flex", gap: 5, marginTop: 12, paddingLeft: 2, alignItems: "center" }}>
+                  {[0, 1, 2].map((i) => (
+                    <span
+                      key={i}
+                      style={{
+                        display: "inline-block",
+                        width: 4,
+                        height: 4,
+                        borderRadius: "50%",
+                        background: T.muted,
+                        animation: `db-dot-pulse 1.2s ease-in-out ${i * 0.22}s infinite`,
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+              {nameItPhase === "confirmed" && (
+                <p style={{
+                  fontSize: 12,
+                  color: T.muted,
+                  lineHeight: 1.5,
+                  marginTop: 12,
+                  animation: "db-confirm-in 0.35s ease forwards",
+                }}>
+                  Good. Now let&apos;s look at why it hasn&apos;t happened.
+                </p>
+              )}
             </div>
 
             {/* Category */}
@@ -678,7 +734,10 @@ export default function CheckPage() {
                     key={cat}
                     label={cat}
                     selected={intake.category === cat}
-                    onClick={() => setIntake({ ...intake, category: cat as typeof intake.category, category_other: "" })}
+                    onClick={() => {
+                      setIntake({ ...intake, category: cat as typeof intake.category, category_other: "" });
+                      triggerNameItFeedback(titleValueRef.current);
+                    }}
                   />
                 ))}
               </div>
