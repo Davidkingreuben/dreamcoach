@@ -421,6 +421,10 @@ export default function CheckPage() {
   const confirmedTitleRef = useRef("");   // the title value when feedback was last shown
   const titleValueRef = useRef("");        // always-current input value (avoids stale closure)
 
+  // ── Micro-commit intercept (after "Honestly, no" on willing_to_commit) ──
+  const [microCommitVisible, setMicroCommitVisible] = useState(false);
+  const [microCommitAnswer, setMicroCommitAnswer] = useState<"" | "yes" | "no">("");
+
   // ── Save and generate insight ──
   function saveAndFinish() {
     const id = crypto.randomUUID();
@@ -470,20 +474,64 @@ export default function CheckPage() {
     };
 
     const generatedInsight = generateInsight(dreamToSave);
-    dreamToSave.insight_summary = generatedInsight;
+
+    // Branch insight based on how the micro-commit question was answered
+    let finalInsight: InsightSummary;
+    if (microCommitAnswer === "no") {
+      // Release path — hardcoded release-oriented insight
+      finalInsight = {
+        seen: "The dream matters to you. But the time it would require doesn't match where your life is right now.",
+        held: "Carrying a dream you aren't ready to work on creates quiet pressure. The mind keeps reopening it, asking \"when?\"",
+        moved: "It may be time to make a conscious decision: Either give this dream real space, or set it down for now without guilt.",
+        moved_doorway: "Acknowledge this decision to yourself. Write it down if that helps — deciding clearly is an act of self-respect.",
+        philosophy_line: "Clarity is lighter than carrying unfinished things.",
+      };
+    } else if (microCommitAnswer === "yes") {
+      // Small-steps path — existing insight, with moved content adjusted for 5-min commitment
+      finalInsight = {
+        ...generatedInsight,
+        moved: "Start with just 5 minutes a day. Not to finish the project — just to begin the habit of showing up for it. Small, repeated effort builds more than heroic bursts that fade.",
+        moved_doorway: "Tomorrow, open a blank document, a notebook, or a voice memo. Do 5 minutes. No output required — just presence.",
+      };
+    } else {
+      // Normal path — willing_to_commit === true
+      finalInsight = generatedInsight;
+    }
+
+    dreamToSave.insight_summary = finalInsight;
 
     saveDream(dreamToSave);
     setSavedDreamId(id);
-    setInsight(generatedInsight);
+    setInsight(finalInsight);
     setShowInsight(true);
   }
 
   // ── Navigation helpers ──
+  // willing_to_commit is reality index 5  →  step = TOTAL_INTAKE + TOTAL_RESISTANCE + 5 = 11
+  const WILLING_TO_COMMIT_STEP = TOTAL_INTAKE + TOTAL_RESISTANCE + 5;
+
   function next() {
+    // Intercept: "Honestly, no" on willing_to_commit → show micro-commit question first
+    if (step === WILLING_TO_COMMIT_STEP && reality.willing_to_commit === false && !microCommitVisible) {
+      setMicroCommitVisible(true);
+      return;
+    }
+    // Leaving the micro-commit question → proceed normally
+    if (microCommitVisible) {
+      setMicroCommitVisible(false);
+      if (step < TOTAL_STEPS - 1) setStep(step + 1);
+      else saveAndFinish();
+      return;
+    }
     if (step < TOTAL_STEPS - 1) setStep(step + 1);
     else saveAndFinish();
   }
   function back() {
+    if (microCommitVisible) {
+      setMicroCommitVisible(false);
+      setMicroCommitAnswer("");
+      return;
+    }
     if (step > 0) setStep(step - 1);
   }
 
@@ -502,6 +550,9 @@ export default function CheckPage() {
 
   // ── Can we proceed from current step? ──
   function canProceed(): boolean {
+    // Micro-commit question requires an explicit choice
+    if (microCommitVisible) return microCommitAnswer !== "";
+
     // Step 0: combined intake page — need title, category, and years_delayed
     if (step === 0) {
       return (
@@ -596,13 +647,19 @@ export default function CheckPage() {
             <div style={{ background: `rgba(74,140,110,0.08)`, border: `1px solid ${MOVED_COLOR}30`, borderRadius: 16, padding: "18px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                 <span style={{ fontSize: 14, color: MOVED_COLOR }}>◆</span>
-                <p style={{ fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: MOVED_COLOR, fontWeight: 600, margin: 0 }}>Moved</p>
+                <p style={{ fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: MOVED_COLOR, fontWeight: 600, margin: 0 }}>
+                  {microCommitAnswer === "no" ? "Released" : "Moved"}
+                </p>
               </div>
-              <p style={{ fontSize: 13, color: T.muted, marginBottom: 12, lineHeight: 1.5 }}>One action. Under 10 minutes.</p>
+              <p style={{ fontSize: 13, color: T.muted, marginBottom: 12, lineHeight: 1.5 }}>
+                {microCommitAnswer === "no" ? "A conscious choice." : "One action. Under 10 minutes."}
+              </p>
               <div style={{ background: "rgba(74,140,110,0.12)", borderRadius: 10, padding: "12px 14px", marginBottom: 10 }}>
                 <p style={{ fontSize: 14, color: T.text, lineHeight: 1.65, margin: 0 }}>{insight.moved}</p>
               </div>
-              <p style={{ fontSize: 12, color: T.muted, marginBottom: 6 }}>Or, the doorway:</p>
+              <p style={{ fontSize: 12, color: T.muted, marginBottom: 6 }}>
+                {microCommitAnswer === "no" ? "Begin here:" : "Or, the doorway:"}
+              </p>
               <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: "10px 14px" }}>
                 <p style={{ fontSize: 13, color: T.sub, lineHeight: 1.6, margin: 0, fontStyle: "italic" }}>{insight.moved_doorway}</p>
               </div>
@@ -982,8 +1039,31 @@ export default function CheckPage() {
           </div>
         )}
 
+        {/* ── MICRO-COMMIT QUESTION (intercepts step 11 when willing_to_commit === false) ── */}
+        {microCommitVisible && (
+          <div>
+            <QHeader
+              label="The reality"
+              question="What if the commitment were smaller?"
+              sub="You may not want to give this the full time it would require right now. But would you be willing to give it just 5 minutes a day to begin?"
+            />
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <ChipBtn
+                label="Yes — I could try 5 minutes a day"
+                selected={microCommitAnswer === "yes"}
+                onClick={() => setMicroCommitAnswer("yes")}
+              />
+              <ChipBtn
+                label="No — I don't want to invest time in this right now"
+                selected={microCommitAnswer === "no"}
+                onClick={() => setMicroCommitAnswer("no")}
+              />
+            </div>
+          </div>
+        )}
+
         {/* ── REALITY STEPS (6–13) ── */}
-        {step >= TOTAL_INTAKE + TOTAL_RESISTANCE && (() => {
+        {!microCommitVisible && step >= TOTAL_INTAKE + TOTAL_RESISTANCE && (() => {
           const rIdx = step - TOTAL_INTAKE - TOTAL_RESISTANCE;
           const q = REALITY_QUESTIONS[rIdx];
           if (!q) return null;
