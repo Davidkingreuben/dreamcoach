@@ -325,3 +325,32 @@ export interface CheckIn {
   tiny_step: string;
   created_at: string;
 }
+
+// ── Released Dreams Vault ──────────────────────────────────────────────────────
+
+export type RevisitAnswer =
+  | "lighter"
+  | "miss_it"
+  | "still_unsure"
+  | "five_minutes"
+  | "release_fully";
+
+export interface VaultEntry {
+  id: string;
+  dream_id: string;
+  dream_title: string;
+  released_at: string;
+  truth_reason: string;
+  holding_reason: string;
+  reflection: {
+    taught_me: string;
+    no_longer_carry: string;
+    energy_goes_to: string;
+  };
+  summary: string;
+  meanings: string[];
+  next_review_date: string;
+  revisit_answer?: RevisitAnswer;
+  revisited_at?: string;
+  archived_permanently?: boolean;
+}
