@@ -484,6 +484,7 @@ export default function CheckPage() {
         held: "Carrying a dream you aren't ready to work on creates quiet pressure. The mind keeps reopening it, asking \"when?\"",
         moved: "It may be time to make a conscious decision: Either give this dream real space, or set it down for now without guilt.",
         moved_doorway: "Acknowledge this decision to yourself. Write it down if that helps — deciding clearly is an act of self-respect.",
+        moved_mode: "rest",
         philosophy_line: "Clarity is lighter than carrying unfinished things.",
       };
     } else if (microCommitAnswer === "yes") {
