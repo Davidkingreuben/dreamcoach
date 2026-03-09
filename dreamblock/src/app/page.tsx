@@ -8,18 +8,24 @@ import type { Dream } from "@/lib/types";
 const COPY_OPTIONS = [
   {
     id: "honest",
+    tagline: "That thing you keep telling yourself you'll eventually do.",
     headline: ["DREAM", "COACH"],
-    body: "This isn't about motivation.\nIt's about understanding why you haven't started.",
+    body: "A dream, in this context, simply means a project you've been putting off — starting, finishing, or bringing into the world — whether that's writing a book, releasing music, launching a company, or building something meaningful.",
+    sub: "A structured 3-minute assessment that identifies what's actually stopping you from realizing your dream — so you can either bring the idea into reality or finally let it go.",
   },
   {
     id: "direct",
+    tagline: "That thing you keep telling yourself you'll eventually do.",
     headline: ["DREAM", "COACH"],
-    body: "This isn't about motivation.\nIt's about understanding why you haven't started.",
+    body: "A dream, in this context, simply means a project you've been putting off — starting, finishing, or bringing into the world — whether that's writing a book, releasing music, launching a company, or building something meaningful.",
+    sub: "A structured 3-minute assessment that identifies what's actually stopping you from realizing your dream — so you can either bring the idea into reality or finally let it go.",
   },
   {
     id: "gentle",
+    tagline: "That thing you keep telling yourself you'll eventually do.",
     headline: ["DREAM", "COACH"],
-    body: "This isn't about motivation.\nIt's about understanding why you haven't started.",
+    body: "A dream, in this context, simply means a project you've been putting off — starting, finishing, or bringing into the world — whether that's writing a book, releasing music, launching a company, or building something meaningful.",
+    sub: "A structured 3-minute assessment that identifies what's actually stopping you from realizing your dream — so you can either bring the idea into reality or finally let it go.",
   },
 ];
 
@@ -129,6 +135,18 @@ export default function HomePage() {
           padding: "0 24px 24px",
         }}
       >
+        <p
+          style={{
+            fontSize: 10,
+            letterSpacing: "0.15em",
+            color: "var(--db-muted)",
+            textTransform: "uppercase" as const,
+            fontWeight: 500,
+            marginBottom: 16,
+          }}
+        >
+          {copy.tagline}
+        </p>
         <h1
           style={{
             fontSize: 52,
@@ -178,10 +196,7 @@ export default function HomePage() {
           }}
         >
           <p style={{ fontSize: 13, color: "var(--db-sub)", lineHeight: 1.7, margin: 0 }}>
-            A quick <strong>3-minute diagnostic</strong> for a project you've been putting off.
-          </p>
-          <p style={{ fontSize: 13, color: "var(--db-sub)", lineHeight: 1.7, margin: "8px 0 0" }}>
-            It helps you see what's stopping you — so you can either bring it into reality or let it go.
+            {copy.sub}
           </p>
         </div>
 
