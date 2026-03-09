@@ -348,7 +348,7 @@ function SliderRow({
 
 function SectionLabel({ children }: { children: string }) {
   return (
-    <p style={{ fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase" as const, color: T.muted, fontWeight: 500, marginBottom: 10 }}>
+    <p style={{ fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase" as const, color: T.muted, fontWeight: 500, marginBottom: 16 }}>
       {children}
     </p>
   );
@@ -638,14 +638,14 @@ export default function CheckPage() {
 
         {/* ── STEP 0: Combined intake page ── */}
         {step === 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
 
             {/* Title + input */}
             <div>
               <p style={{ fontSize: 26, fontWeight: 300, color: T.text, lineHeight: 1.3, marginBottom: 6 }}>
                 What have you been putting off?
               </p>
-              <p style={{ fontSize: 13, color: T.muted, lineHeight: 1.5, marginBottom: 16 }}>
+              <p style={{ fontSize: 13, color: T.muted, lineHeight: 1.5, marginBottom: 22 }}>
                 Be specific. Vagueness protects the fantasy.
               </p>
               <SectionLabel>Name it</SectionLabel>
@@ -768,13 +768,13 @@ export default function CheckPage() {
                 label="How much does this matter to you?"
                 value={intake.importance}
                 onChange={(v) => setIntake({ ...intake, importance: v })}
-                mb={28}
+                mb={40}
               />
               <SliderRow
                 label="How much does not doing it hurt?"
                 value={intake.pain}
                 onChange={(v) => setIntake({ ...intake, pain: v })}
-                mb={28}
+                mb={40}
               />
               <SliderRow
                 label="How afraid are you of actually doing it?"
