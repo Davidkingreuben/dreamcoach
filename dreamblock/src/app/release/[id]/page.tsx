@@ -912,7 +912,7 @@ export default function ReleasePage({ params }: { params: { id: string } }) {
       >
         <div style={{ padding: "calc(env(safe-area-inset-top,0px) + 20px) 24px 16px" }}>
           <ProgressDots current={5} total={7} />
-          <SectionLabel>Reflection {ritualStep + 1} of {RITUAL_PROMPTS.length}</SectionLabel>
+          <SectionLabel>{`Reflection ${ritualStep + 1} of ${RITUAL_PROMPTS.length}`}</SectionLabel>
           <p style={{ fontSize: 20, fontWeight: 300, color: T.text, lineHeight: 1.4, marginBottom: 8 }}>
             {prompt.prompt}
           </p>
