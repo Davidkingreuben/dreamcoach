@@ -8,23 +8,23 @@ import type { Dream } from "@/lib/types";
 const COPY_OPTIONS = [
   {
     id: "honest",
-    tagline: "That thing you keep telling yourself you'll eventually do.",
+    tagline: "The thing you keep saying you'll do.",
     headline: ["DREAM", "COACH"],
-    body: "A dream, in this context, simply means a project you've been putting off — starting, finishing, or bringing into the world — whether that's writing a book, releasing music, launching a company, or building something meaningful.",
+    body: "The project you keep putting off.\nStart it.\nOr set it free.",
     sub: "A structured 3-minute assessment that identifies what's actually stopping you from realizing your dream — so you can either bring the idea into reality or finally let it go.",
   },
   {
     id: "direct",
-    tagline: "That thing you keep telling yourself you'll eventually do.",
+    tagline: "The thing you keep saying you'll do.",
     headline: ["DREAM", "COACH"],
-    body: "A dream, in this context, simply means a project you've been putting off — starting, finishing, or bringing into the world — whether that's writing a book, releasing music, launching a company, or building something meaningful.",
+    body: "The project you keep putting off.\nStart it.\nOr set it free.",
     sub: "A structured 3-minute assessment that identifies what's actually stopping you from realizing your dream — so you can either bring the idea into reality or finally let it go.",
   },
   {
     id: "gentle",
-    tagline: "That thing you keep telling yourself you'll eventually do.",
+    tagline: "The thing you keep saying you'll do.",
     headline: ["DREAM", "COACH"],
-    body: "A dream, in this context, simply means a project you've been putting off — starting, finishing, or bringing into the world — whether that's writing a book, releasing music, launching a company, or building something meaningful.",
+    body: "The project you keep putting off.\nStart it.\nOr set it free.",
     sub: "A structured 3-minute assessment that identifies what's actually stopping you from realizing your dream — so you can either bring the idea into reality or finally let it go.",
   },
 ];
