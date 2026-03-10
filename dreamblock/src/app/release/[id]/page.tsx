@@ -495,7 +495,7 @@ export default function ReleasePage({ params }: { params: { id: string } }) {
       { v: "five_min"     as const, label: "Try a 5-minute experiment",   sub: "Give it one small door — 5 minutes a day — and see what happens." },
     ];
 
-    const handleThreeRelease = () => {
+    function handleThreeRelease() {
       if (threeReleaseChoice === "archive_perm") {
         handleConfirm("archive_perm");
       } else if (threeReleaseChoice === "five_min") {
