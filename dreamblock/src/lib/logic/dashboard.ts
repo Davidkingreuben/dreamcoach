@@ -157,7 +157,7 @@ export function generateDailyDashboard(
   // 4. Biggest obstacle this week
   const hardReasons = recentCheckins
     .map((c) => c.hard_reason)
-    .filter((h): h is string => typeof h === "string" && h.length > 0);
+    .filter((h) => h.length > 0) as string[];
   const biggest_obstacle = interpretBiggestObstacle(hardReasons, archetype);
 
   // 5. Tomorrow's smallest meaningful action
