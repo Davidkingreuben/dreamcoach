@@ -392,6 +392,10 @@ export default function CheckPage() {
     protecting_other: "",
     guaranteed_hesitate: "",
   });
+  const [emotionSel, setEmotionSel] = useState<string[]>([]);
+  const [thoughtSel, setThoughtSel] = useState<string[]>([]);
+  const [stuckSel, setStuckSel] = useState<string[]>([]);
+  const [protectSel, setProtectSel] = useState<string[]>([]);
   const [reality, setReality] = useState<RealityAnswers>({
     physical_constraint: "",
     time_realistic: "",
@@ -558,10 +562,10 @@ export default function CheckPage() {
     }
 
     // Resistance steps (1–5)
-    if (step === 1) return resistance.emotion !== "";
-    if (step === 2) return resistance.first_thought !== "";
-    if (step === 3) return resistance.stuck_point !== "";
-    if (step === 4) return resistance.protecting !== "";
+    if (step === 1) return emotionSel.length > 0;
+    if (step === 2) return thoughtSel.length > 0;
+    if (step === 3) return stuckSel.length > 0;
+    if (step === 4) return protectSel.length > 0;
     if (step === 5) return resistance.guaranteed_hesitate !== "";
 
     // Reality steps (6–13)
@@ -906,12 +910,16 @@ export default function CheckPage() {
                 <ChipBtn
                   key={o.v}
                   label={o.l}
-                  selected={resistance.emotion === o.v}
-                  onClick={() => setResistance({ ...resistance, emotion: o.v as typeof resistance.emotion, emotion_other: "" })}
+                  selected={emotionSel.includes(o.v)}
+                  onClick={() => {
+                    const next = emotionSel.includes(o.v) ? emotionSel.filter(v => v !== o.v) : [...emotionSel, o.v];
+                    setEmotionSel(next);
+                    setResistance({ ...resistance, emotion: next.join(",") as typeof resistance.emotion, emotion_other: next.includes("other") ? resistance.emotion_other : "" });
+                  }}
                 />
               ))}
             </div>
-            {resistance.emotion === "other" && (
+            {emotionSel.includes("other") && (
               <input
                 value={resistance.emotion_other || ""}
                 onChange={(e) => setResistance({ ...resistance, emotion_other: e.target.value })}
@@ -934,12 +942,16 @@ export default function CheckPage() {
                 <ChipBtn
                   key={o.v}
                   label={o.l}
-                  selected={resistance.first_thought === o.v}
-                  onClick={() => setResistance({ ...resistance, first_thought: o.v as typeof resistance.first_thought, first_thought_other: "" })}
+                  selected={thoughtSel.includes(o.v)}
+                  onClick={() => {
+                    const next = thoughtSel.includes(o.v) ? thoughtSel.filter(v => v !== o.v) : [...thoughtSel, o.v];
+                    setThoughtSel(next);
+                    setResistance({ ...resistance, first_thought: next.join(",") as typeof resistance.first_thought, first_thought_other: next.includes("other") ? resistance.first_thought_other : "" });
+                  }}
                 />
               ))}
             </div>
-            {resistance.first_thought === "other" && (
+            {thoughtSel.includes("other") && (
               <input
                 value={resistance.first_thought_other || ""}
                 onChange={(e) => setResistance({ ...resistance, first_thought_other: e.target.value })}
@@ -962,12 +974,16 @@ export default function CheckPage() {
                 <ChipBtn
                   key={o.v}
                   label={o.l}
-                  selected={resistance.stuck_point === o.v}
-                  onClick={() => setResistance({ ...resistance, stuck_point: o.v as typeof resistance.stuck_point, stuck_point_other: "" })}
+                  selected={stuckSel.includes(o.v)}
+                  onClick={() => {
+                    const next = stuckSel.includes(o.v) ? stuckSel.filter(v => v !== o.v) : [...stuckSel, o.v];
+                    setStuckSel(next);
+                    setResistance({ ...resistance, stuck_point: next.join(",") as typeof resistance.stuck_point, stuck_point_other: next.includes("other") ? resistance.stuck_point_other : "" });
+                  }}
                 />
               ))}
             </div>
-            {resistance.stuck_point === "other" && (
+            {stuckSel.includes("other") && (
               <input
                 value={resistance.stuck_point_other || ""}
                 onChange={(e) => setResistance({ ...resistance, stuck_point_other: e.target.value })}
@@ -991,12 +1007,16 @@ export default function CheckPage() {
                 <ChipBtn
                   key={o.v}
                   label={o.l}
-                  selected={resistance.protecting === o.v}
-                  onClick={() => setResistance({ ...resistance, protecting: o.v as typeof resistance.protecting, protecting_other: "" })}
+                  selected={protectSel.includes(o.v)}
+                  onClick={() => {
+                    const next = protectSel.includes(o.v) ? protectSel.filter(v => v !== o.v) : [...protectSel, o.v];
+                    setProtectSel(next);
+                    setResistance({ ...resistance, protecting: next.join(",") as typeof resistance.protecting, protecting_other: next.includes("other") ? resistance.protecting_other : "" });
+                  }}
                 />
               ))}
             </div>
-            {resistance.protecting === "other" && (
+            {protectSel.includes("other") && (
               <input
                 value={resistance.protecting_other || ""}
                 onChange={(e) => setResistance({ ...resistance, protecting_other: e.target.value })}
