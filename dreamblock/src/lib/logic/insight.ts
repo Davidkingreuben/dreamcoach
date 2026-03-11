@@ -38,10 +38,23 @@ const SEEN_BY_ARCHETYPE: Record<ResistanceArchetype, string> = {
     "Part of what you want isn't the dream itself — it's what the dream would say about you. That's not a flaw; most desires have this layer. But when the identity payoff is the main driver, the daily work feels hollow. Worth asking: what do you actually want to be doing on a Tuesday afternoon?",
 };
 
+function getOtherPrefix(dream: Dream): string {
+  if (dream.emotion_other?.trim())
+    return `You described feeling "${dream.emotion_other.trim()}" when thinking about this dream — that specificity matters.`;
+  if (dream.first_thought_other?.trim())
+    return `You described "${dream.first_thought_other.trim()}" as the thought that stops you — that's worth holding onto.`;
+  if (dream.protecting_other?.trim())
+    return `You described the resistance as protecting "${dream.protecting_other.trim()}" — that honesty is the starting point.`;
+  if (dream.stuck_point_other?.trim())
+    return `You named "${dream.stuck_point_other.trim()}" as where you get stuck most — and that's exactly what this is designed to address.`;
+  return "";
+}
+
 function getSeen(dream: Dream): string {
   const archetype = dream.archetype as ResistanceArchetype;
-  if (SEEN_BY_ARCHETYPE[archetype]) return SEEN_BY_ARCHETYPE[archetype];
-  return "You've been carrying this longer than you needed to. The resistance makes sense given everything it's protecting you from. Understanding what it's protecting is the first real step.";
+  const base = SEEN_BY_ARCHETYPE[archetype] || "You've been carrying this longer than you needed to. The resistance makes sense given everything it's protecting you from. Understanding what it's protecting is the first real step.";
+  const prefix = getOtherPrefix(dream);
+  return prefix ? `${prefix} ${base}` : base;
 }
 
 // ── HELD: normalization + emotional holding ───────────────────────────────────

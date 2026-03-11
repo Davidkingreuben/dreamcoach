@@ -434,7 +434,11 @@ export default function CheckPage() {
       resistance.stuck_point as Parameters<typeof determineStuckPhase>[0]
     );
     const classification = classifyDream(intake, resistance, reality);
-    const micro_steps = getMicroSteps(archetype, intake.title, intake.category);
+    const micro_steps = getMicroSteps(archetype, intake.title, intake.category, {
+      category_other: intake.category_other,
+      protecting_other: resistance.protecting_other,
+      true_want_other: reality.true_want_other,
+    });
 
     const dreamToSave: Dream = {
       id,

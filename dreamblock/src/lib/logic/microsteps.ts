@@ -1,7 +1,23 @@
 import type { ResistanceArchetype } from "../types";
 
-export function getMicroSteps(archetype: ResistanceArchetype, dreamTitle: string, category: string): string[] {
+export interface MicroStepContext {
+  category_other?: string;
+  protecting_other?: string;
+  true_want_other?: string;
+}
+
+export function getMicroSteps(
+  archetype: ResistanceArchetype,
+  dreamTitle: string,
+  category: string,
+  otherContext?: MicroStepContext,
+): string[] {
   const d = dreamTitle || "your project";
+  // Use the specific category description when the user typed one
+  const cat = (category === "Other" && otherContext?.category_other?.trim())
+    ? otherContext.category_other.trim()
+    : category;
+
   const steps: Record<ResistanceArchetype, string[]> = {
     "Fear of Visibility": [
       `Write about ${d} in a private document — no audience, no stakes, no performance`,
@@ -22,7 +38,7 @@ export function getMicroSteps(archetype: ResistanceArchetype, dreamTitle: string
       `Break ${d} into exactly three phases. What is phase one, at its smallest?`,
     ],
     "Identity Conflict": [
-      `Write: "A person who does ${category} for real would..." and complete the sentence without filtering`,
+      `Write: "A person who does ${cat} for real would..." and complete the sentence without filtering`,
       `Do one private act related to ${d} that no one will see, judge, or know about`,
       `Write about why this matters to you — not to prove it to anyone, just to understand it yourself`,
       `Explore who you'd have to stop being (or pretending to be) if you pursued this`,
@@ -52,5 +68,19 @@ export function getMicroSteps(archetype: ResistanceArchetype, dreamTitle: string
       `Write honestly: if no one ever knew you pursued this, would you still want to?`,
     ],
   };
-  return steps[archetype] || steps["Overwhelm Fog"];
+
+  const base = [...(steps[archetype] || steps["Overwhelm Fog"])];
+
+  // Personalise with free-text "Other" context when available
+  if (otherContext?.category_other?.trim() && category === "Other") {
+    base.unshift(`You mentioned "${otherContext.category_other.trim()}" — spend 10 minutes exploring what that means to you in practice before anything else`);
+  }
+  if (otherContext?.protecting_other?.trim()) {
+    base.push(`You described protecting "${otherContext.protecting_other.trim()}" — keep that in mind as you work through these steps, and move gently past it`);
+  }
+  if (otherContext?.true_want_other?.trim()) {
+    base.push(`You mentioned wanting "${otherContext.true_want_other.trim()}" — hold that honest answer close as your real measure of progress`);
+  }
+
+  return base;
 }

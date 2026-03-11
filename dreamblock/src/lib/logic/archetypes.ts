@@ -74,6 +74,56 @@ export const STUCK_PHASE_MAP: Record<string, StuckPhase> = {
   promoting: "Pre-Publish Panic",
 };
 
+// ── Free-text "Other" keyword helpers ────────────────────────────────────────
+
+function hasKeyword(text: string | undefined, keywords: string[]): boolean {
+  if (!text || !text.trim()) return false;
+  const lower = text.toLowerCase();
+  return keywords.some((kw) => lower.includes(kw));
+}
+
+function resolveOtherSignal(answers: ResistanceAnswers): ResistanceArchetype | null {
+  const {
+    emotion, emotion_other,
+    first_thought, first_thought_other,
+    stuck_point, stuck_point_other,
+    protecting, protecting_other,
+  } = answers;
+
+  const isOther = (val: string) => val === "other" || val.split(",").includes("other");
+
+  if (isOther(emotion) && emotion_other) {
+    if (hasKeyword(emotion_other, ["fear", "anxious", "anxiety", "panic", "terrified", "scared", "afraid"])) return "Fear of Visibility";
+    if (hasKeyword(emotion_other, ["shame", "embarrass", "humiliat", "judged", "rejection"])) return "Shame Loop";
+    if (hasKeyword(emotion_other, ["overwhelm", "burnout", "too much", "exhaust", "drown"])) return "Overwhelm Fog";
+    if (hasKeyword(emotion_other, ["bored", "numb", "hollow", "empty", "detach", "flat"])) return "Misalignment";
+  }
+
+  if (isOther(first_thought) && first_thought_other) {
+    if (hasKeyword(first_thought_other, ["money", "financial", "afford", "cost", "resource", "fund"])) return "Overwhelm Fog";
+    if (hasKeyword(first_thought_other, ["not good enough", "not ready", "not skilled", "not qualified", "impostor"])) return "Perfectionist Freeze";
+    if (hasKeyword(first_thought_other, ["judge", "embarrass", "seen", "expos", "public", "ridicule", "laugh"])) return "Fear of Visibility";
+    if (hasKeyword(first_thought_other, ["too late", "missed", "behind", "past it", "age"])) return "Shame Loop";
+    if (hasKeyword(first_thought_other, ["point", "matter", "who cares", "worth it", "meaningless"])) return "Misalignment";
+  }
+
+  if (isOther(stuck_point) && stuck_point_other) {
+    if (hasKeyword(stuck_point_other, ["start", "begin", "initiat", "first step"])) return "Overwhelm Fog";
+    if (hasKeyword(stuck_point_other, ["finish", "complet", "done", "final", "end"])) return "Perfectionist Freeze";
+    if (hasKeyword(stuck_point_other, ["share", "publish", "post", "release", "show", "put out"])) return "Fear of Visibility";
+    if (hasKeyword(stuck_point_other, ["consist", "habit", "sustain", "keep going", "stick with", "maintain"])) return "Consistency Collapse";
+  }
+
+  if (isOther(protecting) && protecting_other) {
+    if (hasKeyword(protecting_other, ["identity", "who i am", "sense of self", "image", "ego"])) return "Identity Conflict";
+    if (hasKeyword(protecting_other, ["comfort", "safe", "familiar", "routine", "stability"])) return "Fear of Success";
+    if (hasKeyword(protecting_other, ["relationship", "family", "friend", "partner", "marriage"])) return "Fear of Success";
+    if (hasKeyword(protecting_other, ["money", "income", "financial", "afford", "job", "career"])) return "Overwhelm Fog";
+  }
+
+  return null;
+}
+
 export function determineArchetype(answers: ResistanceAnswers): ResistanceArchetype {
   const { emotion, first_thought, stuck_point, protecting, guaranteed_hesitate } = answers;
 
@@ -88,6 +138,10 @@ export function determineArchetype(answers: ResistanceAnswers): ResistanceArchet
   if (stuck_point === "consistency") return "Consistency Collapse";
   if (first_thought === "too_late") return "Shame Loop";
   if (first_thought === "wont_matter") return "Misalignment";
+
+  // Keyword fallback: only fires when base button logic finds no match
+  const otherSignal = resolveOtherSignal(answers);
+  if (otherSignal) return otherSignal;
 
   return "Perfectionist Freeze";
 }
