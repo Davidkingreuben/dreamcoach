@@ -77,8 +77,6 @@ const EMOTION_OPTIONS = [
   { v: "overwhelm", l: "Overwhelm" },
   { v: "boredom", l: "Boredom or numbness" },
   { v: "excite_crash", l: "Excitement, then crash" },
-  { v: "numbness", l: "Numbness" },
-  { v: "not_sure", l: "Not sure" },
   { v: "other", l: "Other" },
 ];
 
