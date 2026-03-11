@@ -596,11 +596,11 @@ export default function CheckPage() {
   if (showInsight && insight) {
     const realizationReady = coreRealization.trim().length > 0;
 
-    function handleUnlock() {
+    const handleUnlock = () => {
       if (!realizationReady) return;
       updateDream(savedDreamId, { user_intention: coreRealization.trim() });
       router.push(`/results/${savedDreamId}`);
-    }
+    };
 
     return (
       <main style={{ background: T.bg, minHeight: "100dvh", display: "flex", flexDirection: "column", maxWidth: 430, margin: "0 auto" }}>
