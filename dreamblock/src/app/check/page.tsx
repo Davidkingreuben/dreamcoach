@@ -558,7 +558,6 @@ export default function CheckPage() {
     if (step === 0) {
       return (
         intake.title.trim().length > 0 &&
-        intake.category !== "" &&
         intake.years_delayed !== ""
       );
     }
@@ -805,32 +804,6 @@ export default function CheckPage() {
               )}
             </div>
 
-            {/* Category */}
-            <div>
-              <SectionLabel>Category</SectionLabel>
-              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8 }}>
-                {CATEGORIES.map((cat) => (
-                  <PillBtn
-                    key={cat}
-                    label={cat}
-                    selected={intake.category === cat}
-                    onClick={() => {
-                      setIntake({ ...intake, category: cat as typeof intake.category, category_other: "" });
-                      triggerNameItFeedback(titleValueRef.current);
-                    }}
-                  />
-                ))}
-              </div>
-              {intake.category === "Other" && (
-                <input
-                  type="text"
-                  value={intake.category_other || ""}
-                  onChange={(e) => setIntake({ ...intake, category_other: e.target.value })}
-                  placeholder="Describe it..."
-                  style={{ marginTop: 8, width: "100%", padding: "10px 13px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.04)", color: T.text, fontSize: 14, outline: "none", boxSizing: "border-box" as const }}
-                />
-              )}
-            </div>
 
             {/* Years delayed */}
             <div>
